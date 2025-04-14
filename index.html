@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vega-Lite Visualization</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <style>
+  	header {  
+      padding: 1.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      border-bottom: 2px solid;
+    }
+
+
+
+</style>
+
+</head>
+
+
+<body>
+	<header>
+		<center>
+    <h1>Visualizing Tables using Vega-Lite ELL824</h1></center>
+  </header>
+<h2>Dibyajyoti Jena (2024EEZ8388)</h2>
+
+Importing data from HW_III.csv 
+
+  <h2>Q1: Donut Chart: Rep vs Total</h2>
+
+  <div id="donut"></div>
+  <!-- <script>
+        var spec = "vega_lite.json";
+        vegaEmbed('#vis', spec).then(function(result) {}).catch(console.error);
+    </script> -->
+  <script>
+    vegaEmbed('#donut', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "config": {
+  "background": "#2d2d2d",
+  "axis": {
+    "domainColor": "#ccc",
+    "gridColor": "#555",
+    "tickColor": "#ccc",
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "legend": {
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "title": {
+    "color": "#f5f5f5"
+  },
+  "view": {
+    "stroke": "transparent"
+  }
+},
+
+       "width": 500,
+  "height": 500,
+      "data": {"url": "HW_III.csv", "format": {"type": "csv"}},
+
+      "transform": [
+        {
+          "aggregate": [{"op": "sum", "field": "Total", "as": "TotalSum"}],
+          "groupby": ["Rep"]
+        }
+      ],
+      "mark": {"type": "arc", "innerRadius": 100},
+      "encoding": {
+        "theta": {"field": "TotalSum", "type": "quantitative"},
+        "color": {"field": "Rep", "type": "nominal"},
+        "tooltip": [{"field": "Rep"}, {"field": "TotalSum"}]
+      },
+      "view": {"stroke": null}
+    });
+
+</script>
+
+
+
+  <h2>Q2: Scatter Plot: Correlation between Units and Unit Cost</h2>
+  <h4>With rectangular brush to highlight items</h4>
+
+  <div id="scatter"></div>
+<script>
+
+    vegaEmbed('#scatter', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "config": {
+  "background": "#2d2d2d",
+  "axis": {
+    "domainColor": "#ccc",
+    "gridColor": "#555",
+    "tickColor": "#ccc",
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "legend": {
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "title": {
+    "color": "#f5f5f5"
+  },
+  "view": {
+    "stroke": "transparent"
+  }
+},
+      "width": 500,
+  "height": 500,
+      "data": {"url": "HW_III.csv","format": {"type": "csv"}},
+
+      "params": [
+        {
+          "name": "brush",
+          "select": {"type": "interval"}
+        }
+      ],
+      "mark": "point",
+      "encoding": {
+        "x": {"field": "Units", "type": "quantitative"},
+        "y": {"field": "Unit Cost", "type": "quantitative"},
+        "color": {
+          "condition": {
+            "param": "brush",
+            "field": "Item",
+            "type": "nominal"
+          },
+          "value": "lightgray"
+        },
+        "tooltip": [{"field": "Item"}, {"field": "Units"}, {"field": "Unit Cost"}]
+      }
+    });
+  </script>
+
+<!-- question 3
+ -->
+
+ <h2> Q3: Streamgraph showing how the Total varied over time for each Item</h2>
+  <div id="streamgraph"></div>
+
+ <script>
+  vegaEmbed('#streamgraph', {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "config": {
+  "background": "#2d2d2d",
+  "axis": {
+    "domainColor": "#ccc",
+    "gridColor": "#555",
+    "tickColor": "#ccc",
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "legend": {
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "title": {
+    "color": "#f5f5f5"
+  },
+  "view": {
+    "stroke": "transparent"
+  }
+},
+    "width": 500,
+  "height": 500,
+    "description": "Streamgraph of Total over time by Item",
+    "data": {
+      "url": "HW_III.csv",
+      "format": {
+        "type": "csv"
+      }
+    },
+    "transform": [
+      {
+        "calculate": "toDate(datum.OrderDate)",
+        "as": "ParsedDate"
+      }
+    ],
+    "mark": "area",
+    "encoding": {
+      "x": {
+        "field": "ParsedDate",
+        "type": "temporal",
+        "title": "Order Date"
+      },
+      "y": {
+        "field": "Total",
+        "type": "quantitative",
+        "stack": "center",
+        "title": "Total Sales"
+      },
+      "color": {
+        "field": "Item",
+        "type": "nominal"
+      },
+      "tooltip": [
+        {"field": "Item"},
+        {"field": "Total"},
+        {"field": "ParsedDate", "type": "temporal"}
+      ]
+    }
+  });
+</script>
+
+
+<h2> Q4: Histogram of the units, overlay of Global Mean</h2>
+  <div id="histogram"></div>
+
+<script>
+  vegaEmbed('#histogram', {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "config": {
+  "background": "#2d2d2d",
+  "axis": {
+    "domainColor": "#ccc",
+    "gridColor": "#555",
+    "tickColor": "#ccc",
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "legend": {
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "title": {
+    "color": "#f5f5f5"
+  },
+  "view": {
+    "stroke": "transparent"
+  }
+},
+     "width": 500,
+  "height": 500,
+    "description": "Histogram of Units with mean line",
+    "data": {
+      "url": "HW_III.csv",
+      "format": {
+        "type": "csv"
+      }
+    },
+    "layer": [
+      {
+        "mark": "bar",
+        "encoding": {
+          "x": {
+            "field": "Units",
+            "bin": true,
+            "type": "quantitative",
+            "title": "Units"
+          },
+          "y": {
+            "aggregate": "count",
+            "type": "quantitative",
+            "title": "Count"
+          }
+        }
+      },
+      {
+        "mark": {
+          "type": "rule",
+          "color": "red",
+          "strokeWidth": 2
+        },
+        "encoding": {
+          "x": {
+            "aggregate": "mean",
+            "field": "Units",
+            "type": "quantitative"
+          },
+          "size": {"value": 3},
+          "tooltip": [
+            {"aggregate": "mean", "field": "Units", "type": "quantitative", "title": "Mean Units"}
+          ]
+        }
+      }
+    ]
+  });
+</script>
+
+
+<h2>Q5a: Bar Chart of total sales by regioin</h2>
+<h4>This table shows total sales with respect to each region. Central region shows most sales.</h4> 
+  <div id="bar-region-total"></div>
+<script>
+  vegaEmbed('#bar-region-total', {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "config": {
+  "background": "#2d2d2d",
+  "axis": {
+    "domainColor": "#ccc",
+    "gridColor": "#555",
+    "tickColor": "#ccc",
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "legend": {
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "title": {
+    "color": "#f5f5f5"
+  },
+  "view": {
+    "stroke": "transparent"
+  }
+},
+    "width": 400,
+  "height": 400,
+    "description": "Total Sales by Region",
+    "data": {
+      "url": "HW_III.csv",
+      "format": { "type": "csv" }
+    },
+    "mark": "bar",
+    "encoding": {
+      "x": {
+        "field": "Region",
+        "type": "nominal",
+        "title": "Region",
+        "sort": "-y"
+      },
+      "y": {
+        "aggregate": "sum",
+        "field": "Total",
+        "type": "quantitative",
+        "title": "Total Sales"
+      },
+      "color": {
+        "field": "Region",
+        "type": "nominal"
+      },
+      "tooltip": [
+        {"field": "Region"},
+        {"aggregate": "sum", "field": "Total", "title": "Total Sales"}
+      ]
+    }
+  });
+</script>
+
+
+<h2>Q5b: Line chart of monthly total sales trend with time</h2>
+  <div id="line-monthly-total"></div>
+<script>
+  vegaEmbed('#line-monthly-total', {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "config": {
+  "background": "#2d2d2d",
+  "axis": {
+    "domainColor": "#ccc",
+    "gridColor": "#555",
+    "tickColor": "#ccc",
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "legend": {
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "title": {
+    "color": "#f5f5f5"
+  },
+  "view": {
+    "stroke": "transparent"
+  }
+},
+    "width": 400,
+  "height": 400,
+    "description": "Total Sales Over Time (Monthly)",
+    "data": {
+      "url": "HW_III.csv",
+      "format": { "type": "csv" }
+    },
+    "transform": [
+      {
+        "calculate": "toDate(datum.OrderDate)",
+        "as": "ParsedDate"
+      },
+      {
+        "timeUnit": "yearmonth",
+        "field": "ParsedDate",
+        "as": "Month"
+      }
+    ],
+    "mark": "line",
+    "encoding": {
+      "x": {
+        "field": "Month",
+        "type": "temporal",
+        "title": "Month"
+      },
+      "y": {
+        "aggregate": "sum",
+        "field": "Total",
+        "type": "quantitative",
+        "title": "Total Sales"
+      },
+      "color": {
+        "value": "#1f77b4"
+      },
+      "tooltip": [
+        {"field": "Month", "type": "temporal"},
+        {"aggregate": "sum", "field": "Total", "title": "Total Sales"}
+      ]
+    }
+  });
+</script>
+
+<!-- 
+############################
+############################
+ -->
+
+ <h2>Multiview Visualization</h2>
+
+ <div id = "multiview"></div>
+
+ <script type="text/javascript">
+  vegaEmbed('#multiview', {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "config": {
+  "background": "#2d2d2d",
+  "axis": {
+    "domainColor": "#ccc",
+    "gridColor": "#555",
+    "tickColor": "#ccc",
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "legend": {
+    "labelColor": "#f5f5f5",
+    "titleColor": "#ffcc00"
+  },
+  "title": {
+    "color": "#f5f5f5"
+  },
+  "view": {
+    "stroke": "transparent"
+  }
+},
+    "vconcat": [
+      {
+        "hconcat": [
+          {
+            "data": {"url": "HW_III.csv", "format": {"type": "csv"}},
+            "transform": [
+              {
+                "aggregate": [{"op": "sum", "field": "Total", "as": "TotalSum"}],
+                "groupby": ["Rep"]
+              }
+            ],
+            "mark": {"type": "arc", "innerRadius": 50},
+            "width": 250,
+            "height": 250,
+            "encoding": {
+              "theta": {"field": "TotalSum", "type": "quantitative"},
+              "color": {"field": "Rep", "type": "nominal"},
+              "tooltip": [{"field": "Rep"}, {"field": "TotalSum"}]
+            }
+          },
+          {
+            "data": {"url": "HW_III.csv", "format": {"type": "csv"}},
+            "params": [{"name": "brush", "select": {"type": "interval"}}],
+            "mark": "point",
+            "width": 250,
+            "height": 250,
+            "encoding": {
+              "x": {"field": "Units", "type": "quantitative"},
+              "y": {"field": "Unit Cost", "type": "quantitative"},
+              "color": {
+                "condition": {"param": "brush", "field": "Item", "type": "nominal"},
+                "value": "lightgray"
+              },
+              "tooltip": [{"field": "Item"}, {"field": "Units"}, {"field": "Unit Cost"}]
+            }
+          },
+          {
+            "data": {"url": "HW_III.csv", "format": {"type": "csv"}},
+            "transform": [
+              {"calculate": "toDate(datum.OrderDate)", "as": "ParsedDate"}
+            ],
+            "mark": "area",
+            "width": 250,
+            "height": 250,
+            "encoding": {
+              "x": {"field": "ParsedDate", "type": "temporal", "title": "Order Date"},
+              "y": {
+                "field": "Total",
+                "type": "quantitative",
+                "stack": "center",
+                "title": "Total"
+              },
+              "color": {"field": "Item", "type": "nominal"},
+              "tooltip": [{"field": "Item"}, {"field": "Total"}, {"field": "ParsedDate"}]
+            }
+          }
+        ]
+      },
+      {
+        "hconcat": [
+          {
+            "data": {"url": "HW_III.csv", "format": {"type": "csv"}},
+            "layer": [
+              {
+                "mark": "bar",
+                "encoding": {
+                  "x": {"field": "Units", "bin": true, "type": "quantitative"},
+                  "y": {"aggregate": "count", "type": "quantitative"}
+                }
+              },
+              {
+                "mark": {"type": "rule", "color": "red", "strokeWidth": 2},
+                "encoding": {
+                  "x": {"aggregate": "mean", "field": "Units", "type": "quantitative"}
+                }
+              },
+              {
+                "mark": {
+                  "type": "text",
+                  "align": "left",
+                  "dy": -5,
+                  "dx": 5,
+                  "color": "red",
+                  "fontWeight": "bold"
+                },
+                "encoding": {
+                  "x": {"aggregate": "mean", "field": "Units", "type": "quantitative"},
+                  "text": {"value": "Mean"}
+                }
+              }
+            ],
+            "width": 250,
+            "height": 250
+          },
+          {
+            "data": {"url": "HW_III.csv", "format": {"type": "csv"}},
+            "mark": "bar",
+            "encoding": {
+              "x": {
+                "field": "Region",
+                "type": "nominal",
+                "sort": "-y",
+                "title": "Region"
+              },
+              "y": {
+                "aggregate": "sum",
+                "field": "Total",
+                "type": "quantitative",
+                "title": "Total Sales"
+              },
+              "color": {"field": "Region", "type": "nominal"},
+              "tooltip": [{"field": "Region"}, {"aggregate": "sum", "field": "Total"}]
+            },
+            "width": 250,
+            "height": 250
+          },
+          {
+            "data": {"url": "HW_III.csv", "format": {"type": "csv"}},
+            "transform": [
+              {"calculate": "toDate(datum.OrderDate)", "as": "ParsedDate"},
+              {
+                "timeUnit": "yearmonth",
+                "field": "ParsedDate",
+                "as": "Month"
+              }
+            ],
+            "mark": "line",
+            "encoding": {
+              "x": {"field": "Month", "type": "temporal", "title": "Month"},
+              "y": {
+                "aggregate": "sum",
+                "field": "Total",
+                "type": "quantitative",
+                "title": "Total Sales"
+              },
+              "color": {"value": "#1f77b4"},
+              "tooltip": [
+                {"field": "Month", "type": "temporal"},
+                {"aggregate": "sum", "field": "Total"}
+              ]
+            },
+            "width": 250,
+            "height": 250
+          }
+        ]
+      }
+    ]
+  });
+</script>
+
+</body>
+</html>
+
